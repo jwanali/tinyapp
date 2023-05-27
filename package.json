@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/jwanali/tinyapp/issues"
   },
-  "homepage": "https://github.com/jwanali/tinyapp#readme"
+  "homepage": "https://github.com/jwanali/tinyapp#readme",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
 }
