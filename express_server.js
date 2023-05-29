@@ -22,16 +22,24 @@ const urlDatabase = {
 app.post("/urls", (req, res) => {
   const id = generateRandomString();
   const value = req.body.longURL;
+
+  console.log(req.body);
+  
   urlDatabase[id] = value;
- /* const templateVars = {
-    id: id,
-    longURL: value,
-  };
-*/
+ 
   console.log(urlDatabase)
   res.redirect(`/urls/${id}`)
   //res.render("urls_show", templateVars);
   
+});
+app.post("/urls/:id/delete" ,(req,res) =>{
+  const value = req.params.id;
+  console.log(req.body)
+  delete urlDatabase[value];
+  console.log(urlDatabase);
+  const templateVars = {urls: urlDatabase}
+  console.log(urlDatabase)
+  res.render("urls_index", templateVars);
 });
 app.get("/", (req, res) => {
   res.send("Hello!");
@@ -42,6 +50,7 @@ app.get("/urls.json", (req, res) => {
 app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
+
 app.get("/urls", (req, res) => {
   const templateVars = { urls: urlDatabase };
   res.render("urls_index", templateVars);
