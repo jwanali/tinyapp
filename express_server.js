@@ -18,6 +18,23 @@ const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com",
 };
+app.post("/urls/:id/edit", (req, res) => {
+  
+  const value = req.body.longURL;
+  const id = req.params.id;
+  console.log('id',id)
+  console.log(req.body);
+  
+  urlDatabase[id] = value;
+ const templateVars = {
+  id: id,
+  longURL: value
+ }
+  console.log(urlDatabase)
+  res.redirect(`/urls`)
+ // res.render("urls_show", templateVars);
+  
+});
 
 app.post("/urls", (req, res) => {
   const id = generateRandomString();
@@ -26,12 +43,16 @@ app.post("/urls", (req, res) => {
   console.log(req.body);
   
   urlDatabase[id] = value;
- 
+ const templateVars = {
+  id: id,
+  longURL: value
+ }
   console.log(urlDatabase)
   res.redirect(`/urls/${id}`)
-  //res.render("urls_show", templateVars);
+ // res.render("urls_show", templateVars);
   
 });
+
 app.post("/urls/:id/delete" ,(req,res) =>{
   const value = req.params.id;
   //console.log(req.params)
