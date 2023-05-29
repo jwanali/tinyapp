@@ -34,11 +34,10 @@ app.post("/urls", (req, res) => {
 });
 app.post("/urls/:id/delete" ,(req,res) =>{
   const value = req.params.id;
-  console.log(req.body)
+  //console.log(req.params)
   delete urlDatabase[value];
-  console.log(urlDatabase);
+ //console.log(urlDatabase);
   const templateVars = {urls: urlDatabase}
-  console.log(urlDatabase)
   res.render("urls_index", templateVars);
 });
 app.get("/", (req, res) => {
