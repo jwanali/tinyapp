@@ -34,11 +34,11 @@
             <tr>
               <td><%= id %></td>
               <td><%= urls[id] %></td>
-              <td><a href='/urls/<%= id %>'>Edit</a></td>
+              <td><a href='/urls/<%= id %>' style="color: blue;">Edit</a></td>
               <td>
                 <form method="POST"  name="shortURL" action="/urls/<%= id %>/delete">
-                  <button  for="shortURL" type="submit" title="delete button" style="border: 1em;" 
-                  class="btn btn-primary">Delete</button>
+                  <button  for="shortURL" style="color: rgb(230, 25, 25);" type="submit" title="delete button" 
+                 >Delete</button>
                 </form>
               </td>
             </tr>

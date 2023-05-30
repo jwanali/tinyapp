@@ -36,6 +36,31 @@ app.post("/urls/:id/edit", (req, res) => {
   
 });
 
+app.post("/login", (req, res) => {
+  
+  const value = req.body.username;
+  //const value = 
+  console.log(req.body);
+  const templateVars = {username: value};
+  res
+  .cookie('username',value)
+  //.render('partials/_header',templateVars)
+  .redirect(`/urls`);
+  
+  
+ 
+ /* 
+  urlDatabase[id] = value;
+ const templateVars = {
+  id: id,
+  longURL: value
+ }*/
+  //console.log(urlDatabase)
+  
+ // res.render("urls_show", templateVars);
+  
+});
+
 app.post("/urls", (req, res) => {
   const id = generateRandomString();
   const value = req.body.longURL;
