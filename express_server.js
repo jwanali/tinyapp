@@ -3,7 +3,6 @@ const bodyParser = require("body-parser");
 let cookieParser = require("cookie-parser");
 const app = express();
 app.use(cookieParser());
-//app.use(bodyParser());
 const PORT = 8080; // default port 8080
 app.set("view engine", "ejs");
 
@@ -23,7 +22,6 @@ const generateRandomString = function (length) {
 
 const getUserByEmail = function (email) {
   for (user in users) {
-    
     if (users[user].email === email) {
       return users[user];
     }
@@ -60,16 +58,12 @@ const urlDatabase = {
 app.get("/login", (req, res) => {
   const user_id = req.cookies["user_id"];
   const user = users[user_id];
-
   const templateVars = {
     user: user,
   };
-
   res.render("urls_login",templateVars);
 });
 app.post("/register", (req, res) => {
- 
-
   const email = req.body.email;
   const password = req.body.password;
   if (!email || !password) {
@@ -84,34 +78,27 @@ app.post("/register", (req, res) => {
     email: email,
     password: password,
   };
- 
   res.cookie("user_id", id).redirect("/urls");
 });
 //14
 app.get("/register", (req, res) => {
   const user_id = req.cookies["user_id"];
   const user = users[user_id];
-
   const templateVars = {
     user: user,
   };
-  console.log(user)
-
   res.render("urls_register",templateVars);
 });
 
 //13
 
 app.post("/logout", (req, res) => {
- 
   res.clearCookie("user_id");
- 
   const templateVars = {
     user: undefined,
   };
- 
-  res.render("urls_login",templateVars);
- //res.redirect("/login");
+ // res.render("urls_login",templateVars);
+ res.redirect("/login");
 });
 // 12
 
@@ -149,20 +136,14 @@ app.post("/login", (req, res) => {
 app.post("/urls/:id/edit", (req, res) => {
   const value = req.body.longURL;
   const id = req.params.id;
-  console.log("id", id);
-  console.log(req.body);
-
   urlDatabase[id] = value;
-  console.log(urlDatabase);
   res.redirect(`/urls`);
 });
 
 // 10
 app.post("/urls/:id/delete", (req, res) => {
   const value = req.params.id;
-
   delete urlDatabase[value];
-
   res.redirect("/urls");
 });
 // 9
@@ -174,11 +155,7 @@ app.get("/u/:id", (req, res) => {
 app.post("/urls", (req, res) => {
   const id = generateRandomString(6);
   const value = req.body.longURL;
-
-  console.log(req.body);
-
   urlDatabase[id] = value;
-  console.log(urlDatabase);
   res.redirect(`/urls/${id}`);
 });
 
@@ -186,31 +163,23 @@ app.post("/urls", (req, res) => {
 app.get("/urls/new", (req, res) => {
   const user_id = req.cookies["user_id"];
   const user = users[user_id];
-
   const templateVars = {
     user: user,
   };
-
   res.render("urls_new", templateVars);
 });
 
 //5
 
 app.get("/urls/:id", (req, res) => {
-  console.log(req.params.id);
-  console.log(req.params);
-  console.log(urlDatabase[req.params.id], 1);
   if (!urlDatabase[req.params.id]) {
     console.log("please input a valid short URL");
     res.send("please input a valid short URL");
-
     return;
   }
   const user_id = req.cookies["user_id"];
   const user = users[user_id];
-
   const templateVars = {
-    
     user: user,
     id: req.params.id,
     longURL: urlDatabase[req.params.id],
@@ -221,9 +190,7 @@ app.get("/urls/:id", (req, res) => {
 app.get("/urls", (req, res) => {
   const user_id = req.cookies["user_id"];
   const user = users[user_id];
-
   const templateVars = {
-   
     urls: urlDatabase,
     user: user,
   };
