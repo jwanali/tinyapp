@@ -51,7 +51,7 @@ const users = {
 };
 
 const urlDatabase = {
-  b2xVn2: "http://www.lighthouselabs.ca",
+  "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com",
 };
 
@@ -61,6 +61,9 @@ app.get("/login", (req, res) => {
   const templateVars = {
     user: user,
   };
+  if (user_id) {
+   return res.redirect("/urls");
+  }
   res.render("urls_login",templateVars);
 });
 app.post("/register", (req, res) => {
@@ -87,6 +90,9 @@ app.get("/register", (req, res) => {
   const templateVars = {
     user: user,
   };
+  if (user_id) {
+    return res.redirect("/urls");
+   }
   res.render("urls_register",templateVars);
 });
 
@@ -149,10 +155,24 @@ app.post("/urls/:id/delete", (req, res) => {
 // 9
 app.get("/u/:id", (req, res) => {
   const longURL = urlDatabase[req.params.id];
+  if(!longURL) {
+    return res.send("<html><body>sorry the shortened URL you trying to acces, does not exist  </body></html>\n");
+  }
+  console.log(req.params);
+
   res.redirect(longURL);
 });
 //8
 app.post("/urls", (req, res) => {
+  const user_id = req.cookies["user_id"];
+  const user = users[user_id];
+  const templateVars = {
+    user: user,
+  };
+  console.log(user_id,"eee")
+  if (!user_id) {
+    return res.send("<html><body>Sorry you cannot shorten URL. splease login first</body></html>\n");
+   }
   const id = generateRandomString(6);
   const value = req.body.longURL;
   urlDatabase[id] = value;
@@ -166,6 +186,11 @@ app.get("/urls/new", (req, res) => {
   const templateVars = {
     user: user,
   };
+ // console.log(user_id,"eee")
+  if (!user_id) {
+    return res.redirect("/login");
+   }
+  
   res.render("urls_new", templateVars);
 });
 
@@ -194,6 +219,7 @@ app.get("/urls", (req, res) => {
     urls: urlDatabase,
     user: user,
   };
+  
   res.render("urls_index", templateVars);
 });
 
