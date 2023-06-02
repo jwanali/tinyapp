@@ -1,6 +1,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 let cookieParser = require("cookie-parser");
+const bcrypt = require("bcryptjs");
 const app = express();
 app.use(cookieParser());
 const PORT = 8080; // default port 8080
@@ -30,17 +31,19 @@ const getUserByEmail = function (email) {
   }
   return null;
 };
-const getUserByPassword = function (password) {
-  for (user in users) {
-    if (users[user].password === password) {
-      return users[user];
-    }
-  }
-  return null;
+/*
+const matchPassword = function (password,user) {
+  bcrypt.compareSync(password, user.password)
+    if (user.password === password) {
+      return true
+    } else return false
 };
+*/
 
 const users = {
+  /*
   userRandomID: {
+    
     id: "userRandomID",
     email: "user@example.com",
     password: "123",
@@ -50,6 +53,7 @@ const users = {
     email: "user2@example.com",
     password: "dishwasher-funk",
   },
+  */
 };
 
 const urlsForUser = function(id) {
@@ -65,6 +69,8 @@ const urlsForUser = function(id) {
 }
 
  const urlDatabase = {
+
+  /*
   "b6UTxQ": {
     longURL: "https://www.tsn.ca",
     userID: "userRandomID",
@@ -77,14 +83,10 @@ const urlsForUser = function(id) {
     longURL: "http://www.lighthouselabs.ca",
     userID: "user2RandomID",
   }
+  */
 };
  
-/*
-const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com",
-};
-*/
+
 app.get("/login", (req, res) => {
   const user_id = req.cookies["user_id"];
   const user = users[user_id];
@@ -99,6 +101,7 @@ app.get("/login", (req, res) => {
 app.post("/register", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
+  const hashedPassword = bcrypt.hashSync(password, 10);
   if (!email || !password) {
     return res.status(400).send("please input valid email and password");
   }
@@ -109,8 +112,9 @@ app.post("/register", (req, res) => {
   users[id] = {
     id: id,
     email: email,
-    password: password,
+    password: hashedPassword,
   };
+  console.log(users);
   res.cookie("user_id", id).redirect("/urls");
 });
 //14
@@ -147,22 +151,23 @@ app.post("/login", (req, res) => {
   if (!getUserByEmail(email)) {
     return res.status(403).send("sorry the email does not match");
   }
-  if (!getUserByPassword(password)) {
+  const user = getUserByEmail(email)
+  if (!bcrypt.compareSync(password, user.password)) {
     return res.status(403).send("sorry the password  does not match");
   }
-
+  /*
   const id = getUserByEmail(email).id;
   users[id] = {
     id: id,
     email: email,
     password: password,
   };
- 
+ */
   
 
  
   res
-    .cookie("user_id", id)
+    .cookie("user_id", user.id)
 
     .redirect(`/urls`);
 });
@@ -219,13 +224,13 @@ app.post("/urls", (req, res) => {
   const templateVars = {
     user: user,
   };
-  console.log(user_id,"eee")
+ // console.log(user_id,"eee")
   if (!user_id) {
      res.send("<html><body>Sorry you cannot shorten URL. splease login first</body></html>\n");
      return;
    }
   const id = generateRandomString(6);
-  console.log(req.body)
+ // console.log(req.body)
   const value = req.body.longURL;
   urlDatabase[id] = {};
   urlDatabase[id].longURL = value;
@@ -259,7 +264,7 @@ app.get("/urls/:id", (req, res) => {
   }
   const user_id = req.cookies["user_id"];
   const user = users[user_id];
-  console.log(req.body);
+ // console.log(req.body);
   if (!user_id) {
     res.send("<html><body>Sorry, please login first</body></html>\n");
     return;
