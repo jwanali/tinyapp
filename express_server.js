@@ -9,6 +9,8 @@ app.set("view engine", "ejs");
 //7
 app.use(express.urlencoded({ extended: true }));
 
+
+
 const generateRandomString = function (length) {
   //generate random alphanumeric string
   const chars =
@@ -50,11 +52,39 @@ const users = {
   },
 };
 
+const urlsForUser = function(id) {
+  newUrlDatabase = {};
+  for (let urlId in urlDatabase){
+    if(urlDatabase[urlId].userID === id) {
+      newUrlDatabase[urlId] = {};
+      newUrlDatabase[urlId].longURL = urlDatabase[urlId].longURL;
+      newUrlDatabase[urlId].userID = urlDatabase[urlId].userID;
+    }
+  }
+  return newUrlDatabase;
+}
+
+ const urlDatabase = {
+  "b6UTxQ": {
+    longURL: "https://www.tsn.ca",
+    userID: "userRandomID",
+  },
+  "9sm5xK": {
+    longURL: "https://www.google.ca",
+    userID: "user2RandomID",
+  },
+  "b2xVn2": {
+    longURL: "http://www.lighthouselabs.ca",
+    userID: "user2RandomID",
+  }
+};
+ 
+/*
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com",
 };
-
+*/
 app.get("/login", (req, res) => {
   const user_id = req.cookies["user_id"];
   const user = users[user_id];
@@ -142,19 +172,39 @@ app.post("/login", (req, res) => {
 app.post("/urls/:id/edit", (req, res) => {
   const value = req.body.longURL;
   const id = req.params.id;
-  urlDatabase[id] = value;
+  urlDatabase[id].longURL = value;
   res.redirect(`/urls`);
 });
 
 // 10
 app.post("/urls/:id/delete", (req, res) => {
-  const value = req.params.id;
-  delete urlDatabase[value];
+  const id = req.params.id;
+  const user_id = req.cookies["user_id"];
+  if (!urlDatabase[id]) {
+    console.log("please input a valid short URL");
+    res.send("please input a valid short URL");
+    return;
+  }
+  if (!user_id) {
+    res.send("<html><body>Sorry, please login first</body></html>\n");
+    return;
+  }
+  if (urlDatabase[id].userID !== user_id) {
+    
+    res.send("<html><body>Sorry, you are not allowed to get this URL</body></html>\n");
+    return;
+  
+}
+
+  
+
+  
+  delete urlDatabase[id];
   res.redirect("/urls");
 });
 // 9
 app.get("/u/:id", (req, res) => {
-  const longURL = urlDatabase[req.params.id];
+  const longURL = urlDatabase[req.params.id].longURL;
   if(!longURL) {
     return res.send("<html><body>sorry the shortened URL you trying to acces, does not exist  </body></html>\n");
   }
@@ -171,11 +221,16 @@ app.post("/urls", (req, res) => {
   };
   console.log(user_id,"eee")
   if (!user_id) {
-    return res.send("<html><body>Sorry you cannot shorten URL. splease login first</body></html>\n");
+     res.send("<html><body>Sorry you cannot shorten URL. splease login first</body></html>\n");
+     return;
    }
   const id = generateRandomString(6);
+  console.log(req.body)
   const value = req.body.longURL;
-  urlDatabase[id] = value;
+  urlDatabase[id] = {};
+  urlDatabase[id].longURL = value;
+  urlDatabase[id].userID = user_id;
+  console.log(urlDatabase[id]);
   res.redirect(`/urls/${id}`);
 });
 
@@ -204,10 +259,23 @@ app.get("/urls/:id", (req, res) => {
   }
   const user_id = req.cookies["user_id"];
   const user = users[user_id];
+  console.log(req.body);
+  if (!user_id) {
+    res.send("<html><body>Sorry, please login first</body></html>\n");
+    return;
+  }
+  const id = req.params.id;
+  
+  if (urlDatabase[id].userID !== user_id) {
+    
+      res.send("<html><body>Sorry, you are not allowed to get this URL</body></html>\n");
+      return;
+    
+  }
   const templateVars = {
     user: user,
     id: req.params.id,
-    longURL: urlDatabase[req.params.id],
+    longURL: urlDatabase[req.params.id].longURL,
   };
   res.render("urls_show", templateVars);
 });
@@ -215,8 +283,13 @@ app.get("/urls/:id", (req, res) => {
 app.get("/urls", (req, res) => {
   const user_id = req.cookies["user_id"];
   const user = users[user_id];
+  if (!user_id) {
+     res.send("<html><body>Sorry, please login first</body></html>\n");
+     return;
+   }
+   const userUrls = urlsForUser(user_id);
   const templateVars = {
-    urls: urlDatabase,
+    urls: userUrls,
     user: user,
   };
   
