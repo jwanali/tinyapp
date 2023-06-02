@@ -41,19 +41,19 @@ const matchPassword = function (password,user) {
 */
 
 const users = {
-  /*
+  
   userRandomID: {
     
     id: "userRandomID",
     email: "user@example.com",
-    password: "123",
+    password:bcrypt.hashSync("123", 10),
   },
   user2RandomID: {
     id: "user2RandomID",
     email: "user2@example.com",
-    password: "dishwasher-funk",
+    password: bcrypt.hashSync("dishwasher-funk", 10),
   },
-  */
+  
 };
 
 const urlsForUser = function(id) {
@@ -70,7 +70,7 @@ const urlsForUser = function(id) {
 
  const urlDatabase = {
 
-  /*
+  
   "b6UTxQ": {
     longURL: "https://www.tsn.ca",
     userID: "userRandomID",
@@ -83,7 +83,7 @@ const urlsForUser = function(id) {
     longURL: "http://www.lighthouselabs.ca",
     userID: "user2RandomID",
   }
-  */
+  
 };
  
 
