@@ -84,19 +84,23 @@ app.get("/login", (req, res) => {
 app.post("/register", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
-  const hashedPassword = bcrypt.hashSync(password, 10);
+ 
   if (!email || !password) {
     return res.status(400).send("please input valid email and password");
   }
   if (getUserByEmail(email, users)) {
     return res.status(400).send(`the  ${email} is already registerd`);
   }
+  const salt = bcrypt.genSaltSync(11);
+  const hashedPassword = bcrypt.hashSync(password, salt);
+  //const hashedPassword = bcrypt.hashSync(password, 10);
   const id = generateRandomString(12);
   users[id] = {
     id: id,
     email: email,
     password: hashedPassword,
   };
+  console.log(users);
   req.session.user_id = id;
   res.redirect("/urls");
 });
@@ -131,6 +135,7 @@ app.post("/login", (req, res) => {
   if (!bcrypt.compareSync(password, user.password)) {
     return res.status(403).send("sorry the password  does not match");
   }
+  console.log(users)
   req.session.user_id = user.id;
   res.redirect(`/urls`);
 });
