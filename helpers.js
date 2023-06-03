@@ -7,5 +7,16 @@ const getUserByEmail = function (email,database) {
   return null;
 };
 
+const generateRandomString = function (length) {
+  //generate random alphanumeric string
+  const chars =
+    "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  let result = "";
+  for (let i = 0; i < length; i++) {
+    result += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return result;
+};
 
-module.exports = {getUserByEmail};
+
+module.exports = {getUserByEmail, generateRandomString};

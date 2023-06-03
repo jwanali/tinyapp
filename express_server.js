@@ -1,9 +1,12 @@
-const {getUserByEmail} = require('./helpers')
+const {getUserByEmail, generateRandomString} = require('./helpers');
 const express = require("express");
-const bodyParser = require("body-parser");
-let cookieSession = require("cookie-session");
+//const bodyParser = require("body-parser");
+const cookieSession = require("cookie-session");
 const bcrypt = require("bcryptjs");
 const app = express();
+const PORT = 8080; // default port 8080
+app.set("view engine", "ejs");
+app.use(express.urlencoded({ extended: true }));
 app.use(
   cookieSession({
     name: "session",
@@ -12,22 +15,6 @@ app.use(
     //maxAge: 24 * 60 * 60 * 1000 expire 24 hours
   })
 );
-
-const PORT = 8080; // default port 8080
-app.set("view engine", "ejs");
-
-app.use(express.urlencoded({ extended: true }));
-
-const generateRandomString = function (length) {
-  //generate random alphanumeric string
-  const chars =
-    "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-  let result = "";
-  for (let i = 0; i < length; i++) {
-    result += chars[Math.floor(Math.random() * chars.length)];
-  }
-  return result;
-};
 
 const users = {
   userRandomID: {
@@ -93,7 +80,6 @@ app.post("/register", (req, res) => {
   }
   const salt = bcrypt.genSaltSync(11);
   const hashedPassword = bcrypt.hashSync(password, salt);
-  //const hashedPassword = bcrypt.hashSync(password, 10);
   const id = generateRandomString(12);
   users[id] = {
     id: id,
@@ -135,7 +121,7 @@ app.post("/login", (req, res) => {
   if (!bcrypt.compareSync(password, user.password)) {
     return res.status(403).send("sorry the password  does not match");
   }
-  console.log(users)
+  console.log(users);
   req.session.user_id = user.id;
   res.redirect(`/urls`);
 });
@@ -182,7 +168,7 @@ app.get("/u/:id", (req, res) => {
 app.post("/urls", (req, res) => {
   const user_id = req.session.user_id;
   const user = users[user_id];
-  if (!user_id) {
+  if (!user) {
     res.send(
       "<html><body>Sorry you cannot shorten URL. splease login first</body></html>\n"
     );
