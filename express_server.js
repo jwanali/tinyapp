@@ -146,8 +146,8 @@ app.post("/urls/:id/delete", (req, res) => {
   const id = req.params.id;
   const user_id = req.session.user_id;
   if (!urlDatabase[id]) {
-    console.log("please input a valid short URL");
-    res.send("please input a valid short URL");
+   
+    res.send("<html><body>please input a valid short URL</body></html>\n");
     return;
   }
   if (!user_id) {
@@ -177,10 +177,6 @@ app.get("/u/:id", (req, res) => {
 app.post("/urls", (req, res) => {
   const user_id = req.session.user_id;
   const user = users[user_id];
-  /*
-  const templateVars = {
-    user: user,
-  };*/
   if (!user_id) {
     res.send(
       "<html><body>Sorry you cannot shorten URL. splease login first</body></html>\n"
@@ -208,21 +204,22 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.get("/urls/:id", (req, res) => {
-  if (!urlDatabase[req.params.id]) {
-    console.log("please input a valid short URL");
-    res.send("please input a valid short URL");
-    return;
-  }
   const user_id = req.session.user_id;
   const user = users[user_id];
   if (!user_id) {
-    res.send("<html><body>Sorry, please login first</body></html>\n");
+    res.send("<html><body><h3>Sorry, please login first</h3></body></html>\n");
     return;
   }
+  if (!urlDatabase[req.params.id]) {
+    console.log("please input a valid short URL");
+    res.send("<html><body><h3>please input a valid short URL</h3></body></html>\n");
+    return;
+  }
+  
   const id = req.params.id;
   if (urlDatabase[id].userID !== user_id) {
     res.send(
-      "<html><body>Sorry, you are not allowed to get this URL</body></html>\n"
+      "<html><body><h3>Sorry, you are not allowed to get this URL</h3></body></html>\n"
     );
     return;
   }
