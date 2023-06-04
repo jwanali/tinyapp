@@ -18,5 +18,18 @@ const generateRandomString = function (length) {
   return result;
 };
 
+const urlsForUser = function (id,urlDatabase) {
+  const newUrlDatabase = {};
+  for (let urlId in urlDatabase) {
+    if (urlDatabase[urlId].userID === id) {
+      newUrlDatabase[urlId] = {};
+      newUrlDatabase[urlId].longURL = urlDatabase[urlId].longURL;
+      newUrlDatabase[urlId].userID = urlDatabase[urlId].userID;
+    }
+  }
+  return newUrlDatabase;
+};
 
-module.exports = {getUserByEmail, generateRandomString};
+
+
+module.exports = {getUserByEmail, generateRandomString,urlsForUser};

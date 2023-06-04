@@ -1,4 +1,4 @@
-const {getUserByEmail, generateRandomString} = require('./helpers');
+const {getUserByEmail, generateRandomString, urlsForUser} = require('./helpers');
 const express = require("express");
 //const bodyParser = require("body-parser");
 const cookieSession = require("cookie-session");
@@ -28,18 +28,11 @@ const users = {
     password: bcrypt.hashSync("dishwasher-funk", 10),
   },
 };
-
-const urlsForUser = function (id) {
-  const newUrlDatabase = {};
-  for (let urlId in urlDatabase) {
-    if (urlDatabase[urlId].userID === id) {
-      newUrlDatabase[urlId] = {};
-      newUrlDatabase[urlId].longURL = urlDatabase[urlId].longURL;
-      newUrlDatabase[urlId].userID = urlDatabase[urlId].userID;
-    }
-  }
-  return newUrlDatabase;
+const pleaseLoginFirst = function() {
+  return"<html><body><h3>Sorry, please login first</h3></body></html>\n";
 };
+
+
 
 const urlDatabase = {
   b6UTxQ: {
@@ -111,6 +104,7 @@ app.post("/logout", (req, res) => {
 app.post("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
+
   if (!email || !password) {
     return res.status(400).send("please input valid email and password");
   }
@@ -142,7 +136,7 @@ app.post("/urls/:id/delete", (req, res) => {
     return;
   }
   if (!user_id) {
-    res.send("<html><body>Sorry, please login first</body></html>\n");
+    res.send(pleaseLoginFirst());
     return;
   }
   if (urlDatabase[id].userID !== user_id) {
@@ -169,9 +163,7 @@ app.post("/urls", (req, res) => {
   const user_id = req.session.user_id;
   const user = users[user_id];
   if (!user) {
-    res.send(
-      "<html><body>Sorry you cannot shorten URL. splease login first</body></html>\n"
-    );
+    res.send(pleaseLoginFirst());
     return;
   }
   const id = generateRandomString(6);
@@ -198,7 +190,7 @@ app.get("/urls/:id", (req, res) => {
   const user_id = req.session.user_id;
   const user = users[user_id];
   if (!user_id) {
-    res.send("<html><body><h3>Sorry, please login first</h3></body></html>\n");
+    res.send(pleaseLoginFirst());
     return;
   }
   if (!urlDatabase[req.params.id]) {
@@ -226,10 +218,10 @@ app.get("/urls", (req, res) => {
   const user_id = req.session.user_id;
   const user = users[user_id];
   if (!user_id) {
-    res.send("<html><body>Sorry, please login first</body></html>\n");
+    res.send(pleaseLoginFirst());
     return;
   }
-  const userUrls = urlsForUser(user_id);
+  const userUrls = urlsForUser(user_id, urlDatabase);
   const templateVars = {
     urls: userUrls,
     user: user,
@@ -238,7 +230,13 @@ app.get("/urls", (req, res) => {
 });
 
 app.get("/", (req, res) => {
-  res.send("Hello!");
+  const user_id = req.session.user_id;
+  const user = users[user_id];
+  if (!user_id) {
+    res.redirect("/login");
+  }else {
+    res.redirect(`/urls`);
+  }
 });
 
 app.get("/urls.json", (req, res) => {
