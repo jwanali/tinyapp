@@ -49,26 +49,26 @@ const urlDatabase = {
   },
 };
 
-app.get("/login", (req, res) => {
+app.get("/login", (req, res) => { // getting login page
   const user_id = req.session.user_id;
   const user = users[user_id];
   const templateVars = {
     user: user,
   };
-  if (user_id) {
+  if (user_id) {  // chicking if user logedin or not 
     return res.redirect("/urls");
   }
   res.render("urls_login", templateVars);
 });
 
-app.post("/register", (req, res) => {
+app.post("/register", (req, res) => { // submiting registering info
   const email = req.body.email;
   const password = req.body.password;
  
-  if (!email || !password) {
+  if (!email || !password) { // checking if email and password is valid or not
     return res.status(400).send("please input valid email and password");
   }
-  if (getUserByEmail(email, users)) {
+  if (getUserByEmail(email, users)) { //checking if the email is registered or not
     return res.status(400).send(`the  ${email} is already registerd`);
   }
   const salt = bcrypt.genSaltSync(11);
@@ -84,7 +84,7 @@ app.post("/register", (req, res) => {
   res.redirect("/urls");
 });
 
-app.get("/register", (req, res) => {
+app.get("/register", (req, res) => { // geting registerin page
   const user_id = req.session.user_id;
   const user = users[user_id];
   const templateVars = {
@@ -96,23 +96,23 @@ app.get("/register", (req, res) => {
   res.render("urls_register", templateVars);
 });
 
-app.post("/logout", (req, res) => {
+app.post("/logout", (req, res) => { // sign out
   req.session = null;
   res.redirect("/login");
 });
 
-app.post("/login", (req, res) => {
+app.post("/login", (req, res) => {  // sign in
   const email = req.body.email;
   const password = req.body.password;
 
-  if (!email || !password) {
+  if (!email || !password) {   // checking if email and password is valid or not
     return res.status(400).send("please input valid email and password");
   }
-  if (!getUserByEmail(email, users)) {
+  if (!getUserByEmail(email, users)) { //checking if the email is registered or not
     return res.status(403).send("sorry the email does not match");
   }
   const user = getUserByEmail(email, users);
-  if (!bcrypt.compareSync(password, user.password)) {
+  if (!bcrypt.compareSync(password, user.password)) { // checking if password entered is right
     return res.status(403).send("sorry the password  does not match");
   }
   console.log(users);
@@ -120,26 +120,26 @@ app.post("/login", (req, res) => {
   res.redirect(`/urls`);
 });
 
-app.post("/urls/:id/edit", (req, res) => {
+app.post("/urls/:id/edit", (req, res) => { // editing urls
   const value = req.body.longURL;
   const id = req.params.id;
   urlDatabase[id].longURL = value;
   res.redirect(`/urls`);
 });
 
-app.post("/urls/:id/delete", (req, res) => {
+app.post("/urls/:id/delete", (req, res) => { // deleting urls
   const id = req.params.id;
   const user_id = req.session.user_id;
-  if (!urlDatabase[id]) {
+  if (!urlDatabase[id]) { // checking if shorturls is valid or not
    
     res.send("<html><body>please input a valid short URL</body></html>\n");
     return;
   }
-  if (!user_id) {
+  if (!user_id) { // chicking if user logedin or not 
     res.send(pleaseLoginFirst());
     return;
   }
-  if (urlDatabase[id].userID !== user_id) {
+  if (urlDatabase[id].userID !== user_id) { // checking if the user is accesing his data or not
     res.send(
       "<html><body>Sorry, you are not allowed to get this URL</body></html>\n"
     );
@@ -149,9 +149,9 @@ app.post("/urls/:id/delete", (req, res) => {
   res.redirect("/urls");
 });
 
-app.get("/u/:id", (req, res) => {
+app.get("/u/:id", (req, res) => { // acceing url website
   const longURL = urlDatabase[req.params.id].longURL;
-  if (!longURL) {
+  if (!longURL) { //checking if the shortURL exist or not
     return res.send(
       "<html><body>sorry the shortened URL you trying to acces, does not exist  </body></html>\n"
     );
@@ -159,10 +159,10 @@ app.get("/u/:id", (req, res) => {
   res.redirect(longURL);
 });
 
-app.post("/urls", (req, res) => {
+app.post("/urls", (req, res) => { // accesind certain data by shortURL
   const user_id = req.session.user_id;
   const user = users[user_id];
-  if (!user) {
+  if (!user) {   // chicking if user logedin or not 
     res.send(pleaseLoginFirst());
     return;
   }
@@ -174,33 +174,33 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${id}`);
 });
 
-app.get("/urls/new", (req, res) => {
+app.get("/urls/new", (req, res) => { // adding new data
   const user_id = req.session.user_id;
   const user = users[user_id];
   const templateVars = {
     user: user,
   };
-  if (!user_id) {
+  if (!user_id) {  // chicking if user logedin or not 
     return res.redirect("/login");
   }
   res.render("urls_new", templateVars);
 });
 
-app.get("/urls/:id", (req, res) => {
+app.get("/urls/:id", (req, res) => { // accesing certain data by shortURL
   const user_id = req.session.user_id;
   const user = users[user_id];
-  if (!user_id) {
+  if (!user_id) {     // chicking if user logedin or not 
     res.send(pleaseLoginFirst());
     return;
   }
-  if (!urlDatabase[req.params.id]) {
+  if (!urlDatabase[req.params.id]) { // checking if short url is exist or not
     console.log("please input a valid short URL");
     res.send("<html><body><h3>please input a valid short URL</h3></body></html>\n");
     return;
   }
   
   const id = req.params.id;
-  if (urlDatabase[id].userID !== user_id) {
+  if (urlDatabase[id].userID !== user_id) { // checking if the user is allow to get this data
     res.send(
       "<html><body><h3>Sorry, you are not allowed to get this URL</h3></body></html>\n"
     );
@@ -214,10 +214,10 @@ app.get("/urls/:id", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
-app.get("/urls", (req, res) => {
+app.get("/urls", (req, res) => { // shwoing user data
   const user_id = req.session.user_id;
   const user = users[user_id];
-  if (!user_id) {
+  if (!user_id) {  // chicking if user logedin or not 
     res.send(pleaseLoginFirst());
     return;
   }
@@ -229,23 +229,24 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
-app.get("/", (req, res) => {
+app.get("/", (req, res) => { // redirecting to user data
   const user_id = req.session.user_id;
   const user = users[user_id];
-  if (!user_id) {
+  if (!user_id) {  // chicking if user logedin or not 
     res.redirect("/login");
   }else {
     res.redirect(`/urls`);
   }
 });
-
-app.get("/urls.json", (req, res) => {
+ /*
+app.get("/urls.json", (req, res) => { 
   res.json(urlDatabase);
 });
 
 app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
+*/
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
