@@ -1,6 +1,5 @@
 const {getUserByEmail, generateRandomString, urlsForUser} = require('./helpers');
 const express = require("express");
-//const bodyParser = require("body-parser");
 const cookieSession = require("cookie-session");
 const bcrypt = require("bcryptjs");
 const app = express();
@@ -79,7 +78,6 @@ app.post("/register", (req, res) => { // submiting registering info
     email: email,
     password: hashedPassword,
   };
-  console.log(users);
   req.session.user_id = id;
   res.redirect("/urls");
 });
@@ -115,7 +113,6 @@ app.post("/login", (req, res) => {  // sign in
   if (!bcrypt.compareSync(password, user.password)) { // checking if password entered is right
     return res.status(403).send("sorry the password  does not match");
   }
-  console.log(users);
   req.session.user_id = user.id;
   res.redirect(`/urls`);
 });
@@ -148,15 +145,39 @@ app.post("/urls/:id/delete", (req, res) => { // deleting urls
   delete urlDatabase[id];
   res.redirect("/urls");
 });
+app.get("/urls/:id/delete", (req, res) => { // deleting urls
+  const id = req.params.id;
+  const user_id = req.session.user_id;
+  if (!urlDatabase[id]) { // checking if shorturls is valid or not
+   
+    res.send("<html><body>please input a valid short URL</body></html>\n");
+    return;
+  }
+  console.log(user_id);
+  if (!user_id) { // chicking if user logedin or not 
+    res.send(pleaseLoginFirst());
+    return;
+  }
+  if (urlDatabase[id].userID !== user_id) { // checking if the user is accesing his data or not
+    res.send(
+      "<html><body>Sorry, you are not allowed to get this URL</body></html>\n"
+    );
+    return;
+  }
+  delete urlDatabase[id];
+  res.redirect("/urls");
+});
 
 app.get("/u/:id", (req, res) => { // acceing url website
-  const longURL = urlDatabase[req.params.id].longURL;
-  if (!longURL) { //checking if the shortURL exist or not
-    return res.send(
+  const shortURL = urlDatabase[req.params.id];
+  if (!shortURL) { //checking if the shortURL exist or not
+    res.send(
       "<html><body>sorry the shortened URL you trying to acces, does not exist  </body></html>\n"
     );
-  }
-  res.redirect(longURL);
+  } else {
+    const longURL = urlDatabase[req.params.id].longURL;
+    res.redirect(longURL);
+  } 
 });
 
 app.post("/urls", (req, res) => { // accesind certain data by shortURL
@@ -194,7 +215,6 @@ app.get("/urls/:id", (req, res) => { // accesing certain data by shortURL
     return;
   }
   if (!urlDatabase[req.params.id]) { // checking if short url is exist or not
-    console.log("please input a valid short URL");
     res.send("<html><body><h3>please input a valid short URL</h3></body></html>\n");
     return;
   }
@@ -238,16 +258,6 @@ app.get("/", (req, res) => { // redirecting to user data
     res.redirect(`/urls`);
   }
 });
- /*
-app.get("/urls.json", (req, res) => { 
-  res.json(urlDatabase);
-});
-
-app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b></body></html>\n");
-});
-*/
-
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });

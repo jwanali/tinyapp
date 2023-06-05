@@ -22,8 +22,10 @@
     </div>
    
        
-      
-      <a href="/register" style="color: black; margin: 1em;">register</a>
+      <% if (!user) { %>
+        <a href="/register" style="color: black; margin: 1em;">register</a>
+     <% } %>
+     
       <% if (user) { %>
         <form class="form-inline" action="/logout" method="POST" style="justify-self: end;">
           <div> logged in as:<%= user.email %> User!</div>
